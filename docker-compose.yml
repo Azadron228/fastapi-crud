@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  app_db:
+    container_name: postgress_db
+    hostname: app_db
+    image: postgres
+    environment:
+      - POSTGRES_USER=shoqan
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=shoqan
+    volumes:
+      - app_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - app_db
+    ports:
+      - "8000:8000"
+
+volumes:
+  app_db_data:
+    driver: "local"

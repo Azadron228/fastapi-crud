@@ -10,7 +10,6 @@ class UserSchema(BaseModel):
     name: str
     email: str
     password: str
-    role: UserRole
 
 class UserCreate(BaseModel):
     name: str

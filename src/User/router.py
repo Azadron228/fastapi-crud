@@ -1,121 +1,80 @@
 from datetime import datetime
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi import APIRouter
 from pydantic import BaseModel
-from sqlalchemy import select, insert
+
+from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
 
 from src.Item.model import Item
-from src.User.UserSchema import UserSchema, AuthCredentials, UserCreate
+from src.User.UserSchema import AuthCredentials, UserCreate, UserSchema
 from src.User.model import User
-from src.auth import jwt
-from src.auth.jwt import AuthHandler, verify_password
+from src.auth.auth import auth_wrapper
+
+from src.auth.jwt import encode_token, verify_password
+from src.config import settings
+
 from src.database import get_db
 
 router = APIRouter()
 
-auth_handler = AuthHandler()
-users = []
+# auth_handler = AuthHandler()
+# users = []
 
-class Paylod(BaseModel):
-    context: UserSchema
-    iat: int
-    exp: int
-
-
-def encode_token(self, Payload):
-    return jwt.encode(
-        Payload,
-        self.secret,
-        algorithm='HS256'
-    )
-
-
-@router.post("/users", response_model=AuthCredentials)
-def test(auth_details: AuthCredentials):
-    token = auth_handler.encode_token("dwadaw")
-    print(token)
-    return
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 @router.post("/register")
-async def create_user_endpoint(db: Session = Depends(get_db)):
-
-    # user = User(name="dwad", email="tgrrg", password="password")
-    # db.add(user)
-    # db.commit()
-    # db.refresh(user)
-
-    # stmt = insert(User).values(user)
+async def register_user(user: UserCreate, db: Session = Depends(get_db)):
     stmt = (
         insert(User).
-        values(name='usernamddwawagrgrgdwgegegagrre', email='Fudawfgrgrdwawdwadefewdall Username', password='password')
+        values(name=user.name, email=user.email, password=user.password)
     )
     result = await db.execute(stmt)
     await db.commit()
-    stmt = (
-        insert(Item).
-        values(name='username', description='Full Username', owner_id=1, price=3123, created_at=datetime.now())
+
+    return result
+
+@router.post("/token")
+async def get_token(login_request: LoginRequest, db: Session = Depends(get_db)):
+    res = await db.execute(
+        select(User)
+        .where(
+            User.email == login_request.email
+        )
     )
-    result = await db.execute(stmt)
-    await db.commit()
-    return result
+    user = res.scalars().first()
 
-    # products = result.scalars().all()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not verify_password(login_request.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token_data = {
+        "user_id": user.id,
+        "email": user.email
+    }
 
-    # user = create_user(db, user.name, user.email, user.password, user.role)
-    return result
+    access_token = encode_token(token_data, settings.TOKEN_SECRET)
+    return Token(access_token=access_token, token_type="bearer")
 
-user_data = {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "password": "hashedpassword",
-    "role": "admin"
-}
-
-
-@router.post("/login")
-def login(auth_credentials: AuthCredentials, db: Session = Depends(get_db)):
-
-
-    user = db.query(User).filter(User.email == auth_credentials.email).first()
-    return user['password']
-
-    # if not user or not verify_password(auth_credentials.password, user.password):
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="Invalid email or password",
-    #         headers={"WWW-Authenticate": "Bearer"},
-    #     )
-    #
-    # payload = Paylod(UserSchema, 12314, 52345)
-    # token = auth_handler.encode_token(payload)
-    #
-    # # Create access token
-    # access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    # access_token = create_access_token(
-    #     data={"email": user.email, "role": user.role},
-    #     expires_delta=access_token_expires,
-    # )
-    #
-    # return {"access_token": access_token, "token_type": "bearer"}
-
-@router.post('/login')
-def login(auth_details: AuthCredentials):
-    user = None
-    for x in users:
-        if x['username'] == auth_details.username:
-            user = x
-            break
-
-    if (user is None) or (not auth_handler.verify_password(auth_details.password, user['password'])):
-        raise HTTPException(status_code=401, detail='Invalid username and/or password')
-
-    token = auth_handler.encode_token(user['username'])
-    print(user)
-    return {'token': token}
-
+@router.get("/users/me/")
+async def read_users_me(
+    current_user: Annotated[User, Depends(auth_wrapper)]):
+    return current_user
 
 @router.get('/unprotected')
 def unprotected():
@@ -123,5 +82,7 @@ def unprotected():
 
 
 @router.get('/protected')
-def protected(username=Depends(auth_handler.auth_wrapper)):
+def protected(username=Depends(auth_wrapper)):
     return {'name': username}
+
+

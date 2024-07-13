@@ -1,42 +1,40 @@
+from datetime import datetime, timedelta, timezone
+
 import jwt
-from fastapi import HTTPException, Security
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import HTTPException
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from pydantic import BaseModel
 
+from src.config import settings
 
-def hash_password(self, password):
-    return self.pwd_context.hash(password)
+key = settings.TOKEN_SECRET
+algorithm = settings.TOKEN_ALGORITHM
 
-def verify_password(self, plain_password, hashed_password):
-    return self.pwd_context.verify(plain_password, hashed_password)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-class AuthHandler():
-    security = HTTPBearer()
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    secret = 'SECRET'
+class Payload(BaseModel):
+    sub: str
+    iat: datetime = datetime.now()
+    exp: datetime = datetime.now() + timedelta(minutes=30)
 
-    def encode_token(self, user_id):
-        payload = {
-            'exp': datetime.utcnow() + timedelta(days=0, minutes=5),
-            'iat': datetime.utcnow(),
-            'sub': user_id
-        }
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
-        return jwt.encode(
-            payload,
-            self.secret,
-            algorithm='HS256'
-        )
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
-    def decode_token(self, token):
-        try:
-            payload = jwt.decode(token, self.secret, algorithms=['HS256'])
-            return payload['sub']
-        except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail='Signature has expired')
-        except jwt.InvalidTokenError as e:
-            raise HTTPException(status_code=401, detail='Invalid token')
+def encode_token(data: dict, key: str, algorithm: str = "HS256") -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, key, algorithm)
 
-    def auth_wrapper(self, auth: HTTPAuthorizationCredentials = Security(security)):
-        return self.decode_token(auth.credentials)
+def decode_token(token: str, key: str, algorithm: str = "HS256") -> dict:
+    try:
+        payload = jwt.decode(token, key, algorithms=[algorithm])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+

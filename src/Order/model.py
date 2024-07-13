@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 
 from sqlalchemy import Enum, DateTime, ForeignKey
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.database import Base
 
@@ -16,6 +16,8 @@ class Order(Base):
 
     id: Mapped[int] = mapped_column(index=True, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus))
+    status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.pending)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=datetime.now)
+
+    user: Mapped["User"] = relationship(back_populates="order")

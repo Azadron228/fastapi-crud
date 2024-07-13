@@ -15,6 +15,6 @@ class Item(Base):
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
     price: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=datetime.now)
-    # owner: Mapped["User"] = relationship("User",back_populates="items")
-    # owner: Mapped["User"] = relationship("User", back_populates="itmes")
+
+    order_item: Mapped["OrderItem"] = relationship(back_populates="item")
     user: Mapped["User"] = relationship(back_populates="item")

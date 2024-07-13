@@ -1,5 +1,4 @@
-
-def create_user(email):
+def create_item(email):
     async with db as session:
         result = await session.execute(
             select(Item).where(Item.owner_id == user["user_id"])
@@ -7,7 +6,7 @@ def create_user(email):
         items = result.scalars().all()
     return
 
-def get_all_users(email):
+def get_all_items(email):
     async with db as session:
         result = await session.execute(
             select(Item).where(Item.owner_id == user["user_id"])
@@ -15,14 +14,7 @@ def get_all_users(email):
         items = result.scalars().all()
     return
 
-def get_user_by_email(email):
-    async with db as session:
-        result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
-        )
-        items = result.scalars().all()
-    return
-def update_user(email):
+def get_item(email):
     async with db as session:
         result = await session.execute(
             select(Item).where(Item.owner_id == user["user_id"])
@@ -30,7 +22,15 @@ def update_user(email):
         items = result.scalars().all()
     return
 
-def delete_user(email):
+def update_item(email):
+    async with db as session:
+        result = await session.execute(
+            select(Item).where(Item.owner_id == user["user_id"])
+        )
+        items = result.scalars().all()
+    return
+
+def delete_item(email):
     async with db as session:
         result = await session.execute(
             select(Item).where(Item.owner_id == user["user_id"])

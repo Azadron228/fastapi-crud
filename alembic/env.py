@@ -1,4 +1,5 @@
 import asyncio
+import alembic_postgresql_enum
 from logging.config import fileConfig
 
 from sqlalchemy import pool
@@ -29,6 +30,8 @@ config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 from src.database import Base
 from src.Item.model import Item
 from src.User.model import User
+from src.Order.model import Order
+from src.OrderItem.model import OrderItem
 
 target_metadata = Base.metadata
 

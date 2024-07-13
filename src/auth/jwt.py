@@ -20,7 +20,7 @@ class Payload(BaseModel):
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-def get_password_hash(password: str) -> str:
+def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 def encode_token(data: dict, key: str, algorithm: str = "HS256") -> str:

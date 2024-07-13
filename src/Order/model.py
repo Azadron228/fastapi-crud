@@ -4,8 +4,7 @@ from datetime import datetime
 from sqlalchemy import Enum, DateTime, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped
 
-from src.models.Base import Base
-
+from src.database import Base
 
 class OrderStatus(enum.Enum):
     pending = 'pending'

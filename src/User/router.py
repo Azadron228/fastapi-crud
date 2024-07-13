@@ -6,10 +6,12 @@ from pydantic import BaseModel
 from sqlalchemy import select, insert
 from sqlalchemy.orm import Session
 
+from src.Item.model import Item
 from src.User.UserSchema import UserSchema, AuthCredentials, UserCreate
+from src.User.model import User
 from src.auth import jwt
 from src.auth.jwt import AuthHandler, verify_password
-from src.models import get_db, User, Item
+from src.database import get_db
 
 router = APIRouter()
 
@@ -47,13 +49,13 @@ async def create_user_endpoint(db: Session = Depends(get_db)):
     # stmt = insert(User).values(user)
     stmt = (
         insert(User).
-        values(name='usernamdwagrgrgdwgegegagrre', email='Fudawfgrgrdwawdefewdall Username', password='password')
+        values(name='usernamddwawagrgrgdwgegegagrre', email='Fudawfgrgrdwawdwadefewdall Username', password='password')
     )
     result = await db.execute(stmt)
     await db.commit()
     stmt = (
         insert(Item).
-        values(name='username', description='Full Username', owner_id=4, price=3123, created_at=datetime.now())
+        values(name='username', description='Full Username', owner_id=1, price=3123, created_at=datetime.now())
     )
     result = await db.execute(stmt)
     await db.commit()

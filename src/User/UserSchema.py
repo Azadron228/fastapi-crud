@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from src.models import UserRole
+from src.User.model import UserRole
 
 
 class UserSchema(BaseModel):

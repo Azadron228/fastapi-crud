@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from src.models import Base
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,14 +25,13 @@ config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from src.models.Base import Base
-# from src.models.Item import Item
-# from src.models.Order import Order
-# from src.models.OrderItem import OrderItem
-# from src.models.User import User
+
+from src.database import Base
+from src.Item.model import Item
+from src.User.model import User
 
 target_metadata = Base.metadata
-# target_metadata = [Base.metadata, Item.metadata, Order.metadata, OrderItem.metadata, User.metadata]
+
 
 
 # other values from the config, defined by the needs of env.py,

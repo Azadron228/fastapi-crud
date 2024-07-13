@@ -6,6 +6,7 @@ from sqlalchemy.orm import mapped_column, Mapped
 
 from src.models.Base import Base
 
+
 class OrderStatus(enum.Enum):
     pending = 'pending'
     completed = 'completed'

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import Depends, HTTPException, status
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -7,9 +9,7 @@ from sqlalchemy.orm import Session
 from src.User.UserSchema import UserSchema, AuthCredentials, UserCreate
 from src.auth import jwt
 from src.auth.jwt import AuthHandler, verify_password
-
-from src.models.Base import get_db
-from src.models.User import create_user, User, UserRole
+from src.models import get_db, User, Item
 
 router = APIRouter()
 
@@ -36,16 +36,29 @@ def test(auth_details: AuthCredentials):
     print(token)
     return
 
-@router.post("/register", response_model=UserCreate)
+@router.post("/register")
 async def create_user_endpoint(db: Session = Depends(get_db)):
 
-    user = User(name="dwad", email="tgrrg", password="password", role="user")
+    # user = User(name="dwad", email="tgrrg", password="password")
     # db.add(user)
     # db.commit()
     # db.refresh(user)
 
-    stmt = insert(User).values(user)
+    # stmt = insert(User).values(user)
+    stmt = (
+        insert(User).
+        values(name='usernamdwagrgrgdwgegegagrre', email='Fudawfgrgrdwawdefewdall Username', password='password')
+    )
     result = await db.execute(stmt)
+    await db.commit()
+    stmt = (
+        insert(Item).
+        values(name='username', description='Full Username', owner_id=4, price=3123, created_at=datetime.now())
+    )
+    result = await db.execute(stmt)
+    await db.commit()
+    return result
+
     # products = result.scalars().all()
 
     # user = create_user(db, user.name, user.email, user.password, user.role)

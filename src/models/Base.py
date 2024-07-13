@@ -5,8 +5,8 @@ from src.config import settings
 
 # engine = create_async_engine(settings.DATABASE_URL, echo=True)
 # DBSession = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-# class Base(DeclarativeBase):
-#     pass
+class Base(DeclarativeBase):
+    pass
 
 engine = create_async_engine(settings.DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(
@@ -14,7 +14,8 @@ SessionLocal = sessionmaker(
     class_=AsyncSession,
 )
 
-Base = declarative_base()
+# Base = declarative_base()
+
 async def get_db():
     db = SessionLocal()
     try:

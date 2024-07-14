@@ -8,13 +8,13 @@ class Base(DeclarativeBase):
     pass
 
 engine = create_async_engine(settings.DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(
+async_session = sessionmaker(
     bind=engine,
     class_=AsyncSession,
 )
 
 async def get_db():
-    db = SessionLocal()
+    db = async_session()
     try:
         yield db
     finally:

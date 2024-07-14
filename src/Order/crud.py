@@ -1,15 +1,21 @@
-def create_order(email):
-    async with db as session:
+from sqlalchemy import insert
+
+from src.Order.model import Order
+from src.database import get_db
+
+
+async def create_order(OrderCreate):
+    async with get_db() as session:
         result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
+            insert(Order).values(OrderCreate)
         )
-        items = result.scalars().all()
+
     return
 
-def get_all_orders(email):
-    async with db as session:
+async def get_all_orders(id):
+    async with get_db() as session:
         result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
+            select(Order)
         )
         items = result.scalars().all()
     return

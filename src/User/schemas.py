@@ -15,7 +15,6 @@ class UserCreate(BaseModel):
     name: str
     email: str
     password: str
-    role: UserRole
 
 class AuthCredentials(BaseModel):
     email: str

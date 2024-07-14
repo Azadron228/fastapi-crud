@@ -1,41 +1,47 @@
+from sqlalchemy import select, insert, update, delete
 
-def create_user(email):
-    async with db as session:
+from src.User.model import User
+from src.User.schemas import UserCreate
+from src.database import get_db
+
+
+async def create_user(UserCreate: UserCreate):
+    async with get_db() as session:
         result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
+            insert(User).values(UserCreate)
         )
-        items = result.scalars().all()
     return
 
-def get_all_users(email):
-    async with db as session:
+async def get_all_users():
+    async with get_db() as session:
         result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
+            select(User)
         )
-        items = result.scalars().all()
+        users = result.scalars().all()
+    return users
+
+async def get_user_by_email(email: str):
+    async with get_db() as session:
+        result = await session.execute(
+            select(User).where(User.email == email)
+        )
+        user = result.scalars().first()
+    return user
+
+def update_user(UserUpdate: UserUpdate):
+    async with get_db() as session:
+        result = await session.execute(
+            update(User)
+        )
+
     return
 
-def get_user_by_email(email):
-    async with db as session:
+async def delete_user(id):
+    async with get_db() as session:
         result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
+            delete(User).where(User.id == id)
         )
-        items = result.scalars().all()
-    return
-def update_user(email):
-    async with db as session:
-        result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
-        )
-        items = result.scalars().all()
-    return
 
-def delete_user(email):
-    async with db as session:
-        result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
-        )
-        items = result.scalars().all()
     return
 
 

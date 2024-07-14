@@ -10,3 +10,11 @@ class ItemCreate(BaseModel):
     owner_id: int
     price: float
     created_at: datetime
+
+
+class ItemUpdate(BaseModel):
+    name: str
+    description: str
+    owner_id: int
+    price: float
+    created_at: datetime

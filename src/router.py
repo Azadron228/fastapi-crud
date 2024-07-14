@@ -6,11 +6,7 @@ from src.OrderItem.router import router as order_item_router
 
 router = APIRouter()
 
-router.include_router(user_router)
-router.include_router(item_router, prefix="/items")
-router.include_router(order_router, prefix="/order")
-router.include_router(order_item_router, prefix="/order")
-
-@router.get("/")
-def read_root():
-    return {"Hello": "World"}
+router.include_router(user_router, tags=["User Registration"])
+router.include_router(item_router, prefix="/items", tags=["Items CRUD"])
+router.include_router(order_router, prefix="/order", tags=["Orders CRUD"])
+router.include_router(order_item_router, prefix="/order", tags=["Add items to orders"])

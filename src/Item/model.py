@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import String, Integer, Float, ForeignKey, DateTime
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
+from src.OrderItem.model import OrderItem
 from src.database import Base
 
 
@@ -16,5 +17,4 @@ class Item(Base):
     price: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=datetime.now)
 
-    order_item: Mapped["OrderItem"] = relationship(back_populates="item")
-    user: Mapped["User"] = relationship(back_populates="item")
+    order_item = relationship("OrderItem", back_populates="items")

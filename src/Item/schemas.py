@@ -1,20 +1,14 @@
-from datetime import datetime
-
+from typing import Optional
 from pydantic import BaseModel
 
-
 class ItemCreate(BaseModel):
-    id: int
     name: str
     description: str
     owner_id: int
     price: float
-    created_at: datetime
-
 
 class ItemUpdate(BaseModel):
-    name: str
-    description: str
-    owner_id: int
-    price: float
-    created_at: datetime
+    name: Optional[str] = None
+    description: Optional[str] = None
+    owner_id: Optional[int] = None
+    price: Optional[float] = None

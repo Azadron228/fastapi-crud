@@ -1,58 +1,42 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import insert, select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from src.Item import crud
-from src.Item.schemas import ItemCreate
-from src.auth.auth import auth_wrapper, user_is_admin
+from src.Item import crud as item_crud
+from src.Item.schemas import ItemCreate, ItemUpdate
+from src.auth.auth import auth_wrapper
 from src.database import get_db
 
 router = APIRouter()
 
 @router.post("/")
-async def create_item(item_form: ItemCreate, user=Depends(auth_wrapper), db: Session = Depends(get_db)):
-    if user_is_admin:
-        result = crud.create_item(item_form)
-    else:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-
+async def create_item(item_form: ItemCreate, db: AsyncSession = Depends(get_db)):
+    result = await item_crud.create_item(item_form, db)
     return result
 
-@router.get("/")
-async def get_all_items(user=Depends(auth_wrapper), db: Session = Depends(get_db)):
-    if user_is_admin:
-        result = crud.get_all_items()
-    else:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
 
+@router.get("/")
+async def get_all_items(db: AsyncSession = Depends(get_db)):
+    result = await item_crud.get_all_items(db)
     return result
 
 
 @router.get("/{item_id}")
-async def get_item_by_id(item_id: int, user=Depends(auth_wrapper), db: Session = Depends(get_db)):
-    if user_is_admin:
-        result = crud.get_item(item_id)
-    else:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-
+async def get_item_by_id(item_id: int,db: Session = Depends(get_db)):
+    result = await item_crud.get_item_by_id(item_id, db)
     return result
 
 
-
+#
 @router.put("/{item_id}")
-async def update_item(item_id: int, update_form: UpdateItem):
-    if user_is_admin:
-        result = crud.update_item(item_id, update_form)
-    else:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+async def update_item(item_id: int, update_form: ItemUpdate, db: Session = Depends(get_db)):
+    result = await item_crud.update_item(item_id, update_form, db)
 
     return result
 
 @router.delete("/{item_id}")
-async def delete_item(item_id: int):
-    if user_is_admin:
-        result = crud.delete_item(item_id)
-    else:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-
+async def delete_item(item_id: int, db: Session = Depends(get_db)):
+    result = await item_crud.delete_item(item_id, db)
     return result
+

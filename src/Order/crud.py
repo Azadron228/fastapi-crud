@@ -1,48 +1,62 @@
-from sqlalchemy import insert
+import enum
+from datetime import datetime
+from typing import Optional
 
-from src.Order.model import Order
+from pydantic import BaseModel
+from select import select
+from sqlalchemy import insert, update, delete
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.Order.model import Order, OrderStatus
+from src.Order.schemas import OrderUpdate, OrderCreate
 from src.database import get_db
 
 
-async def create_order(OrderCreate):
+
+
+
+async def create_order(order: OrderCreate, session: AsyncSession):
+    async with session:
+        result = await session.execute(
+            insert(Order).values(
+                user_id = order.user_id,
+                status = OrderStatus.pending,
+                created_at = datetime.now(),
+                updated_at = datetime.now(),
+            )
+        )
+        await session.commit()
+    return result
+
+async def get_all_orders(id) -> Optional[Order]:
     async with get_db() as session:
         result = await session.execute(
-            insert(Order).values(OrderCreate)
+            select(Order).where(Order.id == id)
         )
+    return result.rows > 0
 
-    return
 
-async def get_all_orders(id):
+async def get_order(id) -> Optional[Order]:
     async with get_db() as session:
         result = await session.execute(
-            select(Order)
+            select(Order).where(Order.id == id)
         )
-        items = result.scalars().all()
-    return
+    return result
 
 
-def get_order(email):
-    async with db as session:
+async def update_order(OrderUpdate: OrderUpdate) -> Order:
+    async with get_db() as session:
         result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
+            update(Order)
+            .where(Order.id == OrderUpdate.id)
+            .values(Order=OrderUpdate)
         )
-        items = result.scalars().all()
-    return
+    return result
 
-
-def update_order(email):
-    async with db as session:
+async def delete_order(id: int):
+    async with get_db() as session:
         result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
+            delete(Order).where(Order.id == id)
         )
-        items = result.scalars().all()
-    return
-
-def delete_order(email):
-    async with db as session:
-        result = await session.execute(
-            select(Item).where(Item.owner_id == user["user_id"])
-        )
-        items = result.scalars().all()
-    return
+    return result
 

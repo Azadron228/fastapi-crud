@@ -4,4 +4,7 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
+    sub: int
+    user_id: int
     email: str
+    scopes: dict

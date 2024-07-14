@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+from fastapi.security import SecurityScopes
+
 from src.User.router import router as user_router
 from src.Item.router import router as item_router
 from src.Order.router import router as order_router

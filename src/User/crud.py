@@ -8,7 +8,7 @@ from src.User.schemas import UserCreate, UserUpdate
 from src.database import get_db
 
 
-async def create_user(user: UserCreate, session: AsyncSession):
+async def create_user(user: UserCreate, session: AsyncSession) -> User:
     async with session:
         result = await session.execute(
             insert(User).values(

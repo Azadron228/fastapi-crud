@@ -28,12 +28,19 @@ async def create_order(order: OrderCreate, session: AsyncSession):
         await session.commit()
     return result
 
-async def get_all_orders(id) -> Optional[Order]:
+async def get_all_orders() -> Optional[Order]:
     async with get_db() as session:
         result = await session.execute(
-            select(Order).where(Order.id == id)
+            select(Order)
         )
-    return result.rows > 0
+    return result
+
+async def get_all_orders_of_user(user_id) -> Optional[Order]:
+    async with get_db() as session:
+        result = await session.execute(
+            select(Order).where(Order.user_id == user_id)
+        )
+    return result
 
 
 async def get_order(id) -> Optional[Order]:

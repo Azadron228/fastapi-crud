@@ -29,9 +29,17 @@ class ItemService():
             await session.commit()
         return result
 
-    async def get_all(self):
+    async def get_all(
+        self,
+        limit:int = 25,
+        offset:int = 0
+    ):
         async with self.session as session:
-            result = await session.execute(select(Item))
+            result = await session.execute(
+                select(Item)
+                .limit(limit)
+                .offset(offset)
+            )
             items = result.scalars().all()
         return items
 

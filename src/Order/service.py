@@ -27,9 +27,33 @@ class OrderService():
             await session.commit()
         return result
 
-    async def get_all(self):
+    async def get_all(
+        self,
+        limit: int = 25,
+        offset: int = 0,
+    ):
         async with self.session as session:
-            result = await session.execute(select(Order))
+            result = await session.execute(
+                select(Order)
+                .limit(limit)
+                .offset(offset)
+            )
+            orders = result.scalars().all()
+        return orders
+
+    async def get_all_by_user_id(
+        self,
+        user_id: int,
+        limit: int = 25,
+        offset: int = 0,
+    ):
+        async with self.session as session:
+            result = await session.execute(
+                select(Order)
+                .where(Order.user_id == user_id)
+                .limit(limit)
+                .offset(offset)
+            )
             orders = result.scalars().all()
         return orders
 

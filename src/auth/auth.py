@@ -1,11 +1,17 @@
 from typing import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
+
+from src.User.model import User
 from src.User.service import UserService, get_user_service
 from src.auth.jwt import decode_access_token
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+
+
+async def is_admin(user: User) -> bool:
+    return user.role.value == "admin"
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],

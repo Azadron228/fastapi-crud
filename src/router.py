@@ -15,4 +15,4 @@ router.include_router(order_item_router, prefix="/order", tags=["Add items to or
 
 @router.get("/")
 async def root():
-    return {"Hello": "World"}
+    return {"Hello": "Nigga"}

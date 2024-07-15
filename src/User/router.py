@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from src.User.schemas import UserCreate, UserUpdate, UserDetails, UserResponse
 from src.User.model import User
 from src.User.service import UserService, get_user_service
-from src.auth.auth import get_current_user
+from src.auth.auth import get_current_user, is_admin
 
 from src.auth.jwt import create_access_token, verify_password
 from src.auth.schemas import Token
@@ -25,25 +25,27 @@ async def register_user(
 
 @router.get("/users", response_model=List[UserResponse])
 async def get_all_users(
+    limit:int = 25,
+    offset:int = 0,
     current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service)
 ):
 
-    if current_user.role.value != "admin":
+    if is_admin(current_user):
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    users = await user_service.get_all()
+    users = await user_service.get_all(limit=limit, offset=offset)
     return users
 
 
-@router.get("/users/{uesr_id}", response_model=UserDetails)
+@router.get("/users/{user_id}", response_model=UserDetails)
 async def get_user_by_id(
     user_id: int,
     current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service)
 ):
+    if not is_admin(current_user) and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this user")
 
-    if current_user.role.value != "admin" and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
     result = await user_service.get_by_id(user_id)
     return result
 
@@ -54,19 +56,19 @@ async def update_user(
     current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service)
 ):
-    if current_user.role.value != "admin" and current_user.id != user_id:
+    if not is_admin(current_user) and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     await user_service.update(user_id, update_form)
     return {"message": "User updated successfully"}
 
 
 @router.delete("/users/{user_id}")
-async def update_user(
+async def delete_user(
     user_id:int,
     current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service)
 ):
-    if current_user.role != "admin":
+    if not is_admin(current_user):
         await user_service.delete(user_id)
         return {"message": "User deleted successfully"}
     else:

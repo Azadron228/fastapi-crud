@@ -32,9 +32,13 @@ class UserService():
             await session.commit()
         return user
 
-    async def get_all(self):
+    async def get_all(
+        self,
+        limit: int = 25,
+        offset: int = 0,
+    ):
         async with self.session as session:
-            result = await session.execute(select(User))
+            result = await session.execute(select(User).limit(limit).offset(offset))
             users = result.scalars().all()
         return users
 

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from src.OrderItem.model import OrderItem
 from src.OrderItem.service import get_order_item_service
 from src.User.model import User
-from src.auth.auth import get_current_user
+from src.auth.auth import get_current_user, is_admin
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ async def add_item_to_order(
     order_item_service: OrderItem = Depends(get_order_item_service)
 
 ):
-    if current_user.role.value == "admin":
+    if is_admin(current_user):
         await order_item_service.add_item_to_order(item_id, order_id)
         return {"status": "ok", "order_id": order_id, "item_id": item_id}
     elif current_user.id != order_id:
@@ -30,7 +30,7 @@ async def delete_item_from_order(
     current_user: User = Depends(get_current_user),
     order_item_service: OrderItem = Depends(get_order_item_service)
 ):
-    if current_user.role.value == "admin":
+    if is_admin(current_user):
         await order_item_service.delete_item_from_order(item_id, order_id)
         return {"status": "ok", "order_id": order_id, "item_id": item_id}
     if current_user.id != order_id:

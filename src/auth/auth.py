@@ -23,16 +23,19 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 async def is_admin(user: User) -> bool:
     return user.role.value == "admin"
 
+
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserService = Depends(get_user_service),
 ):
     decode_token = await decode_access_token(token)
     user = await user_service.get_by_id(decode_token["user_id"])
     return user
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
 
 def password_hash(password):
     return pwd_context.hash(password)
@@ -43,10 +46,17 @@ def create_access_token(data: dict):
     expire = datetime.now() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
 
-    encoded_jwt = jwt.encode(to_encode, settings.TOKEN_SECRET, algorithm=settings.TOKEN_ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.TOKEN_SECRET, algorithm=settings.TOKEN_ALGORITHM
+    )
     return encoded_jwt
 
-async def decode_access_token(token: oauth2_scheme, key: str = settings.TOKEN_SECRET, algorithm: str = settings.TOKEN_ALGORITHM) -> TokenData :
+
+async def decode_access_token(
+    token: oauth2_scheme,
+    key: str = settings.TOKEN_SECRET,
+    algorithm: str = settings.TOKEN_ALGORITHM,
+) -> TokenData:
     try:
         payload = jwt.decode(token, key, algorithm)
         return payload

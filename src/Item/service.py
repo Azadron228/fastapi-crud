@@ -11,7 +11,7 @@ from src.User.service import UserService
 from src.database import get_db
 
 
-class ItemService():
+class ItemService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -29,24 +29,15 @@ class ItemService():
             await session.commit()
         return result
 
-    async def get_all(
-        self,
-        limit:int = 25,
-        offset:int = 0
-    ):
+    async def get_all(self, limit: int = 25, offset: int = 0):
         async with self.session as session:
-            result = await session.execute(
-                select(Item)
-                .limit(limit)
-                .offset(offset)
-            )
+            result = await session.execute(select(Item).limit(limit).offset(offset))
             items = result.scalars().all()
         return items
 
     async def get_by_id(self, id: int):
         async with self.session as session:
-            result = await session.execute(
-                select(Item).where(Item.id == id))
+            result = await session.execute(select(Item).where(Item.id == id))
             item = result.scalars().first()
         return item
 
@@ -59,7 +50,7 @@ class ItemService():
                     name=item_update.name,
                     description=item_update.description,
                     price=item_update.price,
-                    created_at=datetime.now()
+                    created_at=datetime.now(),
                 )
             )
             await session.commit()
@@ -68,9 +59,7 @@ class ItemService():
 
     async def delete(self, item_id: int):
         async with self.session as session:
-            result = await session.execute(
-                delete(Item).where(Item.id == item_id)
-            )
+            result = await session.execute(delete(Item).where(Item.id == item_id))
             await session.commit()
 
         return result

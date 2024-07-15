@@ -15,22 +15,22 @@ from src.auth.schemas import Token
 
 router = APIRouter()
 
+
 @router.post("/register")
 async def register_user(
-    user: UserCreate,
-    user_service: UserService = Depends(get_user_service)
+    user: UserCreate, user_service: UserService = Depends(get_user_service)
 ):
     await user_service.create(user)
     return {"message": "User created successfully"}
 
+
 @router.get("/users", response_model=List[UserResponse])
 async def get_all_users(
-    limit:int = 25,
-    offset:int = 0,
+    limit: int = 25,
+    offset: int = 0,
     current_user: User = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserService = Depends(get_user_service),
 ):
-
     if is_admin(current_user):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     users = await user_service.get_all(limit=limit, offset=offset)
@@ -41,20 +41,23 @@ async def get_all_users(
 async def get_user_by_id(
     user_id: int,
     current_user: User = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserService = Depends(get_user_service),
 ):
     if not is_admin(current_user) and current_user.id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this user")
+        raise HTTPException(
+            status_code=403, detail="Not authorized to access this user"
+        )
 
     result = await user_service.get_by_id(user_id)
     return result
 
+
 @router.put("/users/{user_id}")
 async def update_user(
-    user_id:int,
+    user_id: int,
     update_form: UserUpdate,
     current_user: User = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserService = Depends(get_user_service),
 ):
     if not is_admin(current_user) and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -64,9 +67,9 @@ async def update_user(
 
 @router.delete("/users/{user_id}")
 async def delete_user(
-    user_id:int,
+    user_id: int,
     current_user: User = Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserService = Depends(get_user_service),
 ):
     if not is_admin(current_user):
         await user_service.delete(user_id)
@@ -74,13 +77,13 @@ async def delete_user(
     else:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
+
 @router.post("/token", tags=["Authorization"])
 async def get_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    user_service: UserService = Depends(get_user_service)
+    user_service: UserService = Depends(get_user_service),
 ):
-
-    #form_data.user is email
+    # form_data.user is email
     user = await user_service.get_by_email(form_data.username)
 
     if not user:

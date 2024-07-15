@@ -10,7 +10,7 @@ from src.Order.schemas import OrderCreate, OrderUpdate
 from src.database import get_db
 
 
-class OrderService():
+class OrderService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -33,11 +33,7 @@ class OrderService():
         offset: int = 0,
     ):
         async with self.session as session:
-            result = await session.execute(
-                select(Order)
-                .limit(limit)
-                .offset(offset)
-            )
+            result = await session.execute(select(Order).limit(limit).offset(offset))
             orders = result.scalars().all()
         return orders
 
@@ -59,8 +55,7 @@ class OrderService():
 
     async def get_by_id(self, id: int):
         async with self.session as session:
-            result = await session.execute(
-                select(Order).where(Order.id == id))
+            result = await session.execute(select(Order).where(Order.id == id))
             order = result.scalars().first()
         return order
 
@@ -80,9 +75,7 @@ class OrderService():
 
     async def delete(self, order_id: int):
         async with self.session as session:
-            result = await session.execute(
-                delete(Order).where(Order.id == order_id)
-            )
+            result = await session.execute(delete(Order).where(Order.id == order_id))
             await session.commit()
 
         return result

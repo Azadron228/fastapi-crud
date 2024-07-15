@@ -12,17 +12,18 @@ router = APIRouter()
 async def create_order(
     order_form: OrderCreate,
     current_user: User = Depends(get_current_user),
-    order_service: OrderService = Depends(get_order_service)
+    order_service: OrderService = Depends(get_order_service),
 ):
-    await order_service.create(order_form,current_user.id)
+    await order_service.create(order_form, current_user.id)
     return {"message": "Order created successfully"}
+
 
 @router.get("/")
 async def get_all_orders(
-    limit:int = 25,
-    offset:int = 0,
+    limit: int = 25,
+    offset: int = 0,
     current_user: User = Depends(get_current_user),
-    order_service: OrderService = Depends(get_order_service)
+    order_service: OrderService = Depends(get_order_service),
 ):
     if is_admin(current_user):
         result = await order_service.get_all(limit, offset)
@@ -30,11 +31,12 @@ async def get_all_orders(
         result = await order_service.get_all_by_user_id(current_user.id, limit, offset)
     return result
 
+
 @router.get("/{order_id}")
 async def get_order_by_id(
     order_id: int,
     current_user: User = Depends(get_current_user),
-    order_service: OrderService = Depends(get_order_service)
+    order_service: OrderService = Depends(get_order_service),
 ):
     order = await order_service.get_by_id(order_id)
 
@@ -45,11 +47,13 @@ async def get_order_by_id(
     else:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
+
 @router.put("/{order_id}")
 async def update_order(
-    order_id:int, update_form: OrderUpdate,
+    order_id: int,
+    update_form: OrderUpdate,
     current_user: User = Depends(get_current_user),
-    order_service: OrderService = Depends(get_order_service)
+    order_service: OrderService = Depends(get_order_service),
 ):
     order = await order_service.get_by_id(order_id)
 
@@ -63,12 +67,11 @@ async def update_order(
     raise HTTPException(status_code=403, detail="Not enough permissions")
 
 
-
 @router.delete("/{order_id}")
 async def delete_order(
-    order_id:int,
+    order_id: int,
     current_user: User = Depends(get_current_user),
-    order_service: OrderService = Depends(get_order_service)
+    order_service: OrderService = Depends(get_order_service),
 ):
     order = await order_service.get_by_id(order_id)
     if is_admin(current_user):

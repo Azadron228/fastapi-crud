@@ -7,7 +7,8 @@ from src.User.model import User
 from src.User.schemas import UserCreate, UserUpdate
 from src.auth.auth import password_hash
 
-class UserService():
+
+class UserService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -19,7 +20,7 @@ class UserService():
             if existing_user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email already registered"
+                    detail="Email already registered",
                 )
 
             user = await session.execute(
@@ -44,15 +45,13 @@ class UserService():
 
     async def get_by_email(self, email: str):
         async with self.session as session:
-            result = await session.execute(
-                select(User).where(User.email == email))
+            result = await session.execute(select(User).where(User.email == email))
             user = result.scalars().first()
         return user
 
     async def get_by_id(self, id: int):
         async with self.session as session:
-            result = await session.execute(
-                select(User).where(User.id == id))
+            result = await session.execute(select(User).where(User.id == id))
             user = result.scalars().first()
         return user
 
@@ -64,21 +63,23 @@ class UserService():
                 .values(
                     name=user_update.name,
                     email=user_update.email,
-                    password=user_update.password
+                    password=user_update.password,
                 )
             )
             await session.commit()
             user = result
         return user
 
-    async def delete(self, id: int,):
+    async def delete(
+        self,
+        id: int,
+    ):
         async with self.session as session:
-            result = await session.execute(
-                delete(User).where(User.id == id)
-            )
+            result = await session.execute(delete(User).where(User.id == id))
             await session.commit()
 
         return result
+
 
 def get_user_service(session: AsyncSession = Depends(get_db)):
     return UserService(session)

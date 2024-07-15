@@ -5,11 +5,11 @@ from src.database import Base
 
 
 class OrderItem(Base):
-    __tablename__ = 'order_item'
+    __tablename__ = "order_item"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), nullable=False)
-    item_id: Mapped[int] = mapped_column(ForeignKey('items.id'), nullable=False)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer)
 
     orders = relationship("Order", back_populates="order_item")

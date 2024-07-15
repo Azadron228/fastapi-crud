@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy import String, Integer, Float, ForeignKey, DateTime
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
-from src.OrderItem.model import OrderItem
 from src.database import Base
 
 

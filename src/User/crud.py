@@ -1,24 +1,32 @@
-from fastapi import Depends
-from passlib.handlers import bcrypt
-from sqlalchemy import select, insert, update, delete, text
+from fastapi import HTTPException, status
+from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.User.model import User
 from src.User.schemas import UserCreate, UserUpdate
-from src.database import get_db
+from src.auth.jwt import password_hash
 
 
 async def create_user(user: UserCreate, session: AsyncSession) -> User:
     async with session:
-        result = await session.execute(
+        result = await session.execute(select(User).filter_by(email=user.email))
+        existing_user = result.scalar_one_or_none()
+
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+
+        user = await session.execute(
             insert(User).values(
                 name=user.name,
                 email=user.email,
-                password=user.password
+                password=password_hash(user.password),
             )
         )
         await session.commit()
-    return result
+    return user
 
 
 async def get_all_users(session: AsyncSession):

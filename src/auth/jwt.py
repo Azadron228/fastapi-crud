@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta, timezone
-from typing import Union
+from datetime import datetime, timedelta
 
 import jwt
 from fastapi import HTTPException

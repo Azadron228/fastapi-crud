@@ -7,4 +7,3 @@ class TokenData(BaseModel):
     sub: int
     user_id: int
     email: str
-    scopes: dict

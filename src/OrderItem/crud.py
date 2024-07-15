@@ -1,9 +1,8 @@
 from pydantic import BaseModel
-from sqlalchemy import delete, insert
+from sqlalchemy import delete, insert, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.OrderItem.model import OrderItem
-from src.database import get_db
 
 class OrderItemAdd(BaseModel):
     id: int
@@ -15,11 +14,15 @@ class OrderItemAdd(BaseModel):
 async def add_item_to_order(item_id: int , order_id , session: AsyncSession):
     async with session:
         result = await session.execute(
+            select(func.count(OrderItem.id)).where(OrderItem.order_id == order_id)
+        )
+        item_count = result.scalar()
+        result = await session.execute(
             insert(OrderItem)
             .values(
                 order_id=order_id,
                 item_id=item_id,
-                quantity=911,
+                quantity=item_count+1,
             )
         )
         await session.commit()

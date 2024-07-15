@@ -1,22 +1,20 @@
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import select, update, delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.Item.model import Item
 from src.Item.schemas import ItemCreate, ItemUpdate
-from src.database import get_db
 
 
 
-async def create_item(item: ItemCreate, session: AsyncSession):
+async def create_item(item: ItemCreate,user_id: int, session: AsyncSession):
     async with session:
         result = await session.execute(
             insert(Item).values(
                 name=item.name,
                 description=item.description,
-                owner_id=item.owner_id,
+                owner_id=user_id,
                 price=item.price,
                 created_at=datetime.now(),
             )
@@ -48,8 +46,7 @@ async def update_item(item_id: int ,item_update: ItemUpdate, session: AsyncSessi
                 name = item_update.name,
                 description = item_update.description,
                 price = item_update.price,
-                created_at = datetime.now(),
-                owner_id = item_update.owner_id,
+                created_at = datetime.now()
             )
         )
         await session.commit()

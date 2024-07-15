@@ -5,7 +5,7 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.User.model import User
 from src.User.schemas import UserCreate, UserUpdate
-from src.auth.jwt import password_hash
+from src.auth.auth import password_hash
 
 class UserService():
     def __init__(self, session: AsyncSession):

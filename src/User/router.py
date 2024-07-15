@@ -9,7 +9,7 @@ from src.User.model import User
 from src.User.service import UserService, get_user_service
 from src.auth.auth import get_current_user, is_admin
 
-from src.auth.jwt import create_access_token, verify_password
+from src.auth.auth import create_access_token, verify_password
 from src.auth.schemas import Token
 
 

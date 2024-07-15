@@ -1,19 +1,16 @@
-from typing import Optional, Annotated
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
+from typing import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-
-from src.User import crud as user_crud
-from src.User.model import User
+from src.User.service import UserService, get_user_service
 from src.auth.jwt import decode_access_token
-from src.database import get_db
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: AsyncSession = Depends(get_db)) -> Optional[User]:
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    user_service: UserService = Depends(get_user_service)
+):
     decode_token = await decode_access_token(token)
-    user = await user_crud.get_user_by_id(decode_token["user_id"],db)
+    user = await user_service.get_by_id(decode_token["user_id"])
     return user

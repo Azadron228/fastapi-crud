@@ -11,9 +11,6 @@ class UserService():
     def __init__(self, session: AsyncSession):
         self.session = session
 
-
-
-
     async def create(self, user: UserCreate) -> User:
         async with self.session as session:
             result = await session.execute(select(User).filter_by(email=user.email))

@@ -2,8 +2,12 @@ from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
-    DATABASE_URL: str = "postgresql+asyncpg://shoqan:password@app_db/shoqan"
-    TOKEN_SECRET: str = "0298472a00c80cf31fc7fdc5166fdd6968fd4c7319758362f0e71c361070c346"
-    TOKEN_ALGORITHM: str = "HS256"
+    DATABASE_URL: str
+    TOKEN_SECRET: str
+    TOKEN_ALGORITHM: str
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 settings = Config()

@@ -7,12 +7,14 @@
    ```bash
    git clone https://github.com/Azadron228/fastapi-crud.git
 
+2. Copy .env.exmample to .env
+
    
-2. Build and run the Docker container:
+3. Build and run the Docker container:
     ```bash
     docker-compose up --build
-   
-3. Migrate database:
+
+4. Migrate database:
     ```bash
     docker-compose run app alembic upgrade head
 

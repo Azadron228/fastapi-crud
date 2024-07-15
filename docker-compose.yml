@@ -1,8 +1,6 @@
-version: '3.7'
-
 services:
   app_db:
-    container_name: postgress_db
+    container_name: app_db
     hostname: app_db
     image: postgres
     environment:
@@ -18,6 +16,7 @@ services:
     build: .
     depends_on:
       - app_db
+    command: bash -c "alembic revision --autogenerate && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     ports:
       - "8000:8000"
 

@@ -7,3 +7,5 @@ pyjwt
 passlib[bcrypt]
 pydantic-settings
 alembic_postgresql_enum
+uvloop
+httptools

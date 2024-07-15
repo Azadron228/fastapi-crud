@@ -22,7 +22,3 @@
 ### Usage
 
 - Access the FastAPI application at `http://localhost:8000/docs` to view the Swagger UI.
-
-### Admin User credentials
-- email: shoqan@mail.com
-- password: password

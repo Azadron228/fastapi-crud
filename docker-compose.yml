@@ -2,7 +2,7 @@ services:
   app_db:
     container_name: app_db
     hostname: app_db
-    image: postgre
+    image: postgres
     environment:
       - POSTGRES_USER=shoqan
       - POSTGRES_PASSWORD=password

@@ -15,7 +15,11 @@ class ItemService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, item: ItemCreate, user_id: int):
+    async def create(
+        self,
+        item: ItemCreate,
+        user_id: int
+    ):
         async with self.session as session:
             result = await session.execute(
                 insert(Item).values(
@@ -66,4 +70,4 @@ class ItemService:
 
 
 def get_item_service(session: AsyncSession = Depends(get_db)):
-    return UserService(session)
+    return ItemService(session)

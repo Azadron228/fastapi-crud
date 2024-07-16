@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from fastapi import Depends
-from select import select
-from sqlalchemy import insert, update, delete
+from sqlalchemy import insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.Order.model import OrderStatus, Order
@@ -33,7 +32,11 @@ class OrderService:
         offset: int = 0,
     ):
         async with self.session as session:
-            result = await session.execute(select(Order).limit(limit).offset(offset))
+            result = await session.execute(
+                select(Order)
+                .limit(limit)
+                .offset(offset)
+            )
             orders = result.scalars().all()
         return orders
 

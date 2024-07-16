@@ -15,8 +15,8 @@ async def add_item_to_order(
     order_item_service: OrderItem = Depends(get_order_item_service),
 ):
     if is_admin(current_user):
-        await order_item_service.add_item_to_order(item_id, order_id)
-        return {"status": "ok", "order_id": order_id, "item_id": item_id}
+        result = await order_item_service.add_item_to_order(item_id, order_id)
+        return result
     elif current_user.id != order_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
     else:

@@ -4,24 +4,45 @@ from fastapi import Depends, HTTPException
 from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
-from src.User.schemas import UserCreate, UserUpdate, UserDetails, UserResponse
+from src.User.schemas import UserCreate, UserUpdate, UserDetails, UserResponse, AdminCreate
 from src.User.model import User
 from src.User.service import UserService, get_user_service
 from src.auth.auth import get_current_user, is_admin
 
-from src.auth.auth import create_access_token, verify_password
+from src.auth.auth import create_access_token
+from src.auth.utils import verify_password
 from src.auth.schemas import Token
 
 
 router = APIRouter()
 
 
-@router.post("/register")
+@router.post("/register", response_model=UserDetails)
 async def register_user(
     user: UserCreate, user_service: UserService = Depends(get_user_service)
 ):
-    await user_service.create(user)
-    return {"message": "User created successfully"}
+    result = await user_service.create(user)
+    user = UserDetails(
+        id=result.id,
+        name=user.name,
+        email=user.email,
+        role=user.role,
+    )
+    return user
+
+
+@router.post("/create-admin")
+async def register_admin(
+    user: AdminCreate, user_service: UserService = Depends(get_user_service)
+):
+    result = await user_service.create(user)
+    user = UserDetails(
+        id=result.id,
+        name=user.name,
+        email=user.email,
+        role=user.role,
+    )
+    return user
 
 
 @router.get("/users", response_model=List[UserResponse])
@@ -31,7 +52,7 @@ async def get_all_users(
     current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
 ):
-    if is_admin(current_user):
+    if not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     users = await user_service.get_all(limit=limit, offset=offset)
     return users
@@ -71,7 +92,7 @@ async def delete_user(
     current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
 ):
-    if not is_admin(current_user):
+    if is_admin(current_user):
         await user_service.delete(user_id)
         return {"message": "User deleted successfully"}
     else:

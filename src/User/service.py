@@ -4,15 +4,15 @@ from fastapi import HTTPException, status
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.User.model import User
-from src.User.schemas import UserCreate, UserUpdate
-from src.auth.auth import password_hash
+from src.User.schemas import UserCreate, UserUpdate, AdminCreate
+from src.auth.utils import password_hash
 
 
 class UserService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, user: UserCreate) -> User:
+    async def create(self, user: UserCreate | AdminCreate) -> User:
         async with self.session as session:
             result = await session.execute(select(User).filter_by(email=user.email))
             existing_user = result.scalar_one_or_none()
@@ -23,15 +23,27 @@ class UserService:
                     detail="Email already registered",
                 )
 
-            user = await session.execute(
-                insert(User).values(
-                    name=user.name,
-                    email=user.email,
-                    password=password_hash(user.password),
-                )
+            new_user = User(
+                name=user.name,
+                email=user.email,
+                password=password_hash(user.password),
+                role=user.role,
             )
+
+            session.add(new_user)
             await session.commit()
-        return user
+            await session.refresh(new_user)
+
+            # user = await session.execute(
+            #     insert(User).values(
+            #         name=user.name,
+            #         email=user.email,
+            #         password=password_hash(user.password),
+            #         role = user.role,
+            #     )
+            # )
+            # await session.commit()
+        return new_user
 
     async def get_all(
         self,

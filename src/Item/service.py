@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import select, update, delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.functions import user
 
 from src.Item.model import Item
 from src.Item.schemas import ItemCreate, ItemUpdate
@@ -21,17 +22,18 @@ class ItemService:
         user_id: int
     ):
         async with self.session as session:
-            result = await session.execute(
-                insert(Item).values(
-                    name=item.name,
-                    description=item.description,
-                    owner_id=user_id,
-                    price=item.price,
-                    created_at=datetime.now(),
-                )
+            new_item = Item(
+                name=item.name,
+                description=item.description,
+                owner_id=user_id,
+                price=item.price,
+                created_at=datetime.now()
             )
+
+            session.add(new_item)
             await session.commit()
-        return result
+            await session.refresh(new_item)
+        return new_item
 
     async def get_all(self, limit: int = 25, offset: int = 0):
         async with self.session as session:

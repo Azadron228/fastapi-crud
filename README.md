@@ -22,3 +22,4 @@
 ### Usage
 
 - Access the FastAPI application at `http://localhost:8000/docs` to view the Swagger UI.
+- In swagger ui use email instead of username

@@ -40,9 +40,7 @@ async def get_order_by_id(
 ):
     order = await order_service.get_by_id(order_id)
 
-    if is_admin(current_user):
-        return order
-    elif current_user.id == order.user_id:
+    if is_admin(current_user) or current_user.id == order_id:
         return order
     else:
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -57,14 +55,11 @@ async def update_order(
 ):
     order = await order_service.get_by_id(order_id)
 
-    if is_admin(current_user):
+    if is_admin(current_user) or current_user.id == order_id:
         await order_service.update(update_form, order_id)
         return {"message": "Order updated successfully"}
-    if current_user.id != order.user_id:
-        await order_service.update(update_form, order_id)
-        return {"message": "Order updated successfully"}
-
-    raise HTTPException(status_code=403, detail="Not enough permissions")
+    else:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
 
 
 @router.delete("/{order_id}")

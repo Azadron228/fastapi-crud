@@ -11,8 +11,3 @@ router.include_router(user_router, tags=["User Registration"])
 router.include_router(item_router, prefix="/items", tags=["Items CRUD"])
 router.include_router(order_router, prefix="/order", tags=["Orders CRUD"])
 router.include_router(order_item_router, prefix="/order", tags=["Add items to orders"])
-
-
-@router.get("/")
-async def root():
-    return {"Hello": "Nigga"}

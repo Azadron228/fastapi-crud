@@ -1,6 +1,6 @@
 from typing import Annotated, List
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -45,7 +45,7 @@ async def register_admin(
     return user
 
 
-@router.get("/users", response_model=List[UserResponse])
+@router.get("/users", response_model=List[UserDetails])
 async def get_all_users(
     limit: int = 25,
     offset: int = 0,
@@ -53,7 +53,11 @@ async def get_all_users(
     user_service: UserService = Depends(get_user_service),
 ):
     if not is_admin(current_user):
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized to access this user"
+        )
+
     users = await user_service.get_all(limit=limit, offset=offset)
     return users
 
@@ -70,10 +74,16 @@ async def get_user_by_id(
         )
 
     result = await user_service.get_by_id(user_id)
-    return result
+    user = UserDetails(
+        id=result.id,
+        name=result.name,
+        email=result.email,
+        role=result.role,
+    )
+    return user
 
 
-@router.put("/users/{user_id}")
+@router.put("/users/{user_id}", response_model=UserDetails)
 async def update_user(
     user_id: int,
     update_form: UserUpdate,
@@ -82,19 +92,32 @@ async def update_user(
 ):
     if not is_admin(current_user) and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
-    await user_service.update(user_id, update_form)
-    return {"message": "User updated successfully"}
+
+    result = await user_service.update(user_id, update_form)
+    user = UserDetails(
+        id=result.id,
+        name=result.name,
+        email=result.email,
+        role=result.role,
+    )
+    return user
 
 
-@router.delete("/users/{user_id}")
+@router.delete("/users/{user_id}", response_model=UserDetails)
 async def delete_user(
     user_id: int,
     current_user: User = Depends(get_current_user),
     user_service: UserService = Depends(get_user_service),
 ):
     if is_admin(current_user):
-        await user_service.delete(user_id)
-        return {"message": "User deleted successfully"}
+        result = await user_service.delete(user_id)
+        user = UserDetails(
+            id=result.id,
+            name=result.name,
+            email=result.email,
+            role=result.role,
+        )
+        return user
     else:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 

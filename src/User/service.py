@@ -33,16 +33,6 @@ class UserService:
             session.add(new_user)
             await session.commit()
             await session.refresh(new_user)
-
-            # user = await session.execute(
-            #     insert(User).values(
-            #         name=user.name,
-            #         email=user.email,
-            #         password=password_hash(user.password),
-            #         role = user.role,
-            #     )
-            # )
-            # await session.commit()
         return new_user
 
     async def get_all(
@@ -75,22 +65,36 @@ class UserService:
                 .values(
                     name=user_update.name,
                     email=user_update.email,
-                    password=user_update.password,
+                    password=password_hash(user_update.password),
                 )
             )
             await session.commit()
-            user = result
+            result = await session.execute(
+                select(User).where(User.id == user_id)
+            )
+            user = result.scalar_one_or_none()
         return user
 
     async def delete(
         self,
-        id: int,
+        user_id: int,
     ):
         async with self.session as session:
-            result = await session.execute(delete(User).where(User.id == id))
+            existing_user = await session.execute(
+                select(User).where(User.id == user_id)
+            )
+            user = existing_user.scalar_one_or_none()
+
+            if user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User not found",
+                )
+
+            await session.execute(delete(User).where(User.id == user_id))
             await session.commit()
 
-        return result
+        return user
 
 
 def get_user_service(session: AsyncSession = Depends(get_db)):
